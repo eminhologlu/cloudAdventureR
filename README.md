@@ -15,7 +15,9 @@ Projenin logosu oluşturuldu -> (Bulutun içinden yükselen roket = macerayı ve
 
 ## 2.HAFTA
 
-TODO
+Proje web sayfası oluşturuldu. Uygulamanın özellikleri, üyelik tipleri gibi bilgiler verildi.
+
+https://cloud-adventurer-web.vercel.app/
 
 ## 3.HAFTA
 
