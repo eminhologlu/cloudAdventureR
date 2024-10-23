@@ -15,6 +15,8 @@ Projenin logosu oluşturuldu -> (Bulutun içinden yükselen roket = macerayı ve
 
 ## 2.HAFTA
 
+Proje Flutter'da oluşturulup bu repoya yüklendi.
+
 Proje web sayfası oluşturuldu. Uygulamanın özellikleri, üyelik tipleri gibi bilgiler verildi.
 
 https://cloud-adventurer-web.vercel.app/
