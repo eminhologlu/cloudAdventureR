@@ -1,16 +1,52 @@
-# arprojesi
+# creamoney
 
-A new Flutter project.
+MUHAMMET EMİN HOLOĞLU - 215541008
 
-## Getting Started
+PARA,PARA,PARA KONUSU İÇİN GELİŞTİRİLEN MOBİL UYGULAMA.
 
-This project is a starting point for a Flutter application.
+## 1.HAFTA
 
-A few resources to get you started if this is your first Flutter project:
+Projenin ismi belirlendi -> creamoney (crea = Türkçe’de “yaratmak” anlamına gelen ingilizce creative kelimesinin kısaltması seçildi, money = para)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Proje trello panosu oluşturuldu -> https://trello.com/b/P7hrvxrP
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Proje sosyal medya hesabı oluşturuldu -> https://www.instagram.com/creamoneyapp/
+
+Projenin logosu oluşturuldu -> (köpekler -> sevimlilik, çocuklara uygunluğu temsil ediyor.)
+Canva Linki: https://www.canva.com/design/DAGVFbhdu1Q/bXzRFNdFBdlqVSz0iP6rIQ/edit?utm_content=DAGVFbhdu1Q&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
+
+## 2.HAFTA
+
+Proje Flutter'da oluşturulup bu repoya yüklendi.
+
+Proje web sayfası oluşturuldu. Uygulamanın özellikleri, üyelik tipleri gibi bilgiler verildi.
+
+https://cloud-adventurer-web.vercel.app/
+
+## 3.HAFTA
+
+Projenin gereksinim analizi dokümanı yazıldı.
+Google Drive Linki: https://drive.google.com/file/d/1Tvi_rZ6GWiKBniogvSs-iZPWgnV_6EHb/view?usp=sharing
+
+Proje SWOT analizi yapıldı.
+Canva Linki: https://www.canva.com/design/DAGUbjgffQ0/yQLrXyzqwDXuMPKHRSDU1g/edit?utm_content=DAGUbjgffQ0&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
+
+Proje içerisinde kullanılacak renklere karar verildi. -> https://colorhunt.co/palette/222831393e4600adb5eeeeee
+(turkuaz ve gri renkler, göz yoruculuğunu azaltmak için koyu renkler seçildi.)
+
+## 4.HAFTA
+
+Uygulamanın kullanıcı arayüzleri detaylı bir şekilde Figma'da tasarlandı.
+Figma Linki: https://www.figma.com/design/hS9lL3RjlHZOPlyLyEPVNF/Untitled?node-id=0-1&t=TDmLttYSojRCXCQG-1
+
+## 5.HAFTA
+
+TODO
+
+## 6.HAFTA
+
+TODO
+
+## 7.HAFTA
+
+TODO
