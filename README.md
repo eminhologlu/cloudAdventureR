@@ -41,7 +41,7 @@ Figma Linki: https://www.figma.com/design/hS9lL3RjlHZOPlyLyEPVNF/Untitled?node-i
 
 ## 5.HAFTA
 
-TODO
+Kullanıcı arayüzleri (frontend) Flutter'da kodlandı.
 
 ## 6.HAFTA
 
