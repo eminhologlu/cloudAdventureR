@@ -1,14 +1,14 @@
 import 'package:arprojesi/login.dart';
-import 'package:firebase_core/firebase_core.dart';
+
+import 'package:arprojesi/splash_screen.dart';
+import 'package:arprojesi/your_currencies.dart';
 import 'package:flutter/material.dart';
-import 'firebase_options.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  runApp(MyApp());
+  await dotenv.load();
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -18,8 +18,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'AR PROJESİ',
-      home: Login(),
+      title: 'AR PROJESI',
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const SplashScreen(),
+        '/yourcurrencies': (context) => const CurrencyListScreen(),
+        '/login': (context) => const LoginPage(),
+      },
     );
   }
 }

@@ -1,10 +1,12 @@
 import 'package:arprojesi/choosing.dart';
 import 'package:arprojesi/colors.dart';
+import 'package:arprojesi/moneydata.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
 
 class EpisodeFour extends StatefulWidget {
-  const EpisodeFour({super.key});
+  final Moneydata moneyData;
+  const EpisodeFour({super.key, required this.moneyData});
 
   @override
   State<EpisodeFour> createState() => _EpisodeFourState();
@@ -12,10 +14,6 @@ class EpisodeFour extends StatefulWidget {
 
 class _EpisodeFourState extends State<EpisodeFour> {
   final TextEditingController currencyBirim = TextEditingController();
-  Future<void> saveCurrencyData(int data) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('currencyBirim', data);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,15 +26,23 @@ class _EpisodeFourState extends State<EpisodeFour> {
           backgroundColor: AppColors.turq,
           onPressed: () async {
             int unit = int.parse(currencyBirim.text);
-            await saveCurrencyData(unit);
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => FactorSelectionScreen(unit: unit),
-              ),
-            );
+            if (9 < unit && unit < 101) {
+              widget.moneyData.unit = unit;
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FactorSelectionScreen(
+                      unit: unit, moneyData: widget.moneyData),
+                ),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text("10-100 arasında sayı girmelisin!")),
+              );
+            }
           },
-          child: Icon(
+          child: const Icon(
             Icons.arrow_forward,
             color: AppColors.gray,
           ),
@@ -44,7 +50,7 @@ class _EpisodeFourState extends State<EpisodeFour> {
         body: Stack(
           children: [
             Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage("assets/images/episode4.png"),
                   fit: BoxFit.cover,
@@ -61,23 +67,28 @@ class _EpisodeFourState extends State<EpisodeFour> {
                       width: width * 0.8,
                       height: width * 0.13,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(width * 0.05),
                         color: AppColors.turq,
                       ),
                       child: TextField(
+                        keyboardType: TextInputType.number,
+                        inputFormatters: <TextInputFormatter>[
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
                         controller: currencyBirim,
                         cursorColor: AppColors.gray,
                         cursorHeight: width * 0.04,
-                        style: TextStyle(
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
                           color: AppColors.gray,
                           fontFamily: "Kodchasan",
                         ),
                         decoration: InputDecoration(
-                          contentPadding: EdgeInsets.all(11),
+                          contentPadding: EdgeInsets.all(width * 0.027),
                           border: InputBorder.none,
                           hintText: 'Para birimi belirle (10-100)',
-                          hintStyle: TextStyle(color: AppColors.gray),
-                          prefixIcon: Icon(
+                          hintStyle: const TextStyle(color: AppColors.gray),
+                          prefixIcon: const Icon(
                             Icons.money,
                             color: AppColors.gray,
                           ),

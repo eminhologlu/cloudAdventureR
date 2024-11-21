@@ -2,14 +2,15 @@ import 'dart:convert';
 import 'package:arprojesi/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_drawing_board/flutter_drawing_board.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:arprojesi/moneydata.dart';
 
 class DrawingScreen extends StatefulWidget {
-  final int factor;
+  final double factor;
   final String? type;
+  final Moneydata moneyData;
 
-  const DrawingScreen({Key? key, required this.factor, this.type})
-      : super(key: key);
+  const DrawingScreen(
+      {super.key, required this.factor, this.type, required this.moneyData});
 
   @override
   _DrawingScreenState createState() => _DrawingScreenState();
@@ -18,18 +19,43 @@ class DrawingScreen extends StatefulWidget {
 class _DrawingScreenState extends State<DrawingScreen> {
   final DrawingController _drawingController = DrawingController();
 
+  void _clearDrawing() {
+    setState(() {
+      _drawingController.clear(); // Çizim alanını temizler
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: AppColors.gray,
       appBar: AppBar(
         backgroundColor: AppColors.gray,
-        title: Text("Tasarım: ${widget.type} ${widget.factor}"),
+        title: Text(
+          "Tasarım: ${widget.type} ${widget.factor}",
+          style: TextStyle(
+              fontFamily: "Kodchasan",
+              fontSize: width * 0.05,
+              color: AppColors.dark),
+        ),
         actions: [
           IconButton(
-            icon: Icon(Icons.save_rounded),
+            icon: const Icon(
+              Icons.save_rounded,
+              color: AppColors.turq,
+            ),
             onPressed: () {
               _saveDrawing();
+            },
+          ),
+          IconButton(
+            icon: const Icon(
+              Icons.delete_rounded,
+              color: AppColors.dark,
+            ),
+            onPressed: () {
+              _clearDrawing(); // Çizim alanını sıfırlar
             },
           ),
         ],
@@ -48,9 +74,8 @@ class _DrawingScreenState extends State<DrawingScreen> {
                 showDefaultTools: true,
               ),
             ),
-            // Color Picker
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: EdgeInsets.all(width * 0.05),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -76,32 +101,30 @@ class _DrawingScreenState extends State<DrawingScreen> {
   }
 
   Future<void> _saveDrawing() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    try {
+      final imageData = await _drawingController.getImageData();
+      if (imageData == null) {
+        print("Hata: Çizim verisi alınamadı (imageData null).");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Hata: Çizim kaydedilemedi!")),
+        );
+        return;
+      }
 
-    // Save the drawing as JSON
-    String jsonData = const JsonEncoder.withIndent('  ')
-        .convert(_drawingController.getJsonList());
-    await prefs.setString('drawing_json_${widget.factor}', jsonData);
-    print("Çizim JSON kaydedildi: $jsonData");
-
-    // Get image data
-    final imageData = await _drawingController.getImageData();
-    final buffer = imageData?.buffer.asUint8List();
-
-    if (buffer != null) {
-      // Encode the image data as Base64
+      final buffer = imageData.buffer.asUint8List();
       String base64Image = base64Encode(buffer);
+      widget.moneyData.imageBase64Map[widget.factor] = base64Image;
 
-      // Save the Base64 string in SharedPreferences
-      await prefs.setString('drawing_image_${widget.factor}', base64Image);
-      print("Çizim JPEG olarak kaydedildi: $base64Image");
-
-      // Show a confirmation message to the user
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Çizim kaydedildi!")),
+        const SnackBar(content: Text("Çizim kaydedildi!")),
       );
-    } else {
-      print("Çizim kaydedilemedi, imageData null.");
+    } catch (e) {
+      print("Hata: Çizim kaydedilirken bir hata oluştu. Detay: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Hata: Çizim kaydedilemedi!")),
+      );
+    } finally {
+      Navigator.pop(context);
     }
   }
 }
@@ -110,8 +133,7 @@ class ColorChoice extends StatelessWidget {
   final Color color;
   final ValueChanged<Color> onSelected;
 
-  const ColorChoice({Key? key, required this.color, required this.onSelected})
-      : super(key: key);
+  const ColorChoice({super.key, required this.color, required this.onSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +146,7 @@ class ColorChoice extends StatelessWidget {
         decoration: BoxDecoration(
           color: color,
           shape: BoxShape.circle,
-          border: Border.all(color: Colors.black, width: 1),
+          border: Border.all(color: Colors.black),
         ),
       ),
     );

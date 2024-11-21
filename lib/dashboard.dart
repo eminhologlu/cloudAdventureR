@@ -1,13 +1,17 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:arprojesi/ar_viewer.dart';
+import 'package:arprojesi/db/mongo.dart';
+import 'package:arprojesi/moneydata.dart';
 import 'package:arprojesi/tasks_page.dart';
+import 'package:arprojesi/your_currencies.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:arprojesi/colors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Dashboard extends StatefulWidget {
-  const Dashboard({Key? key}) : super(key: key);
+  final Moneydata moneyData;
+  Dashboard({Key? key, required this.moneyData}) : super(key: key);
 
   @override
   _DashboardState createState() => _DashboardState();
@@ -17,7 +21,8 @@ class _DashboardState extends State<Dashboard> {
   String? currencyName;
   String? currencySymbol;
   int? currencyBirim;
-  Map<String, String?> selections = {};
+  Map<double, String?> selections = {};
+  Map<double, String> base64Map = {};
 
   @override
   void initState() {
@@ -25,33 +30,70 @@ class _DashboardState extends State<Dashboard> {
     _loadData();
   }
 
-  Future<void> _loadData() async {
+  Future<String?> getUsername() async {
     final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('username');
+  }
+
+  Future<void> _loadData() async {
     setState(() {
-      currencyName = prefs.getString('currencyName');
-      currencySymbol = prefs.getString('currencySymbol');
-      currencyBirim = prefs.getInt('currencyBirim');
-      final selectionsString = prefs.getString('selections');
-      if (selectionsString != null) {
-        selections = Map<String, String?>.from(jsonDecode(selectionsString));
-      }
+      currencyName = widget.moneyData.currencyName;
+      currencySymbol = widget.moneyData.symbol;
+      currencyBirim = widget.moneyData.unit;
+      selections = widget.moneyData.selectedCurrencyTypes;
+      base64Map = widget.moneyData.imageBase64Map;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
+
+    TextStyle headerStyle = TextStyle(
+      fontSize: width * 0.05,
+      fontFamily: "Kodchasan",
+      fontWeight: FontWeight.w900,
+      color: AppColors.gray,
+    );
+
+    TextStyle labelStyle = TextStyle(
+      fontSize: width * 0.05,
+      fontFamily: "Kodchasan",
+      fontWeight: FontWeight.w900,
+      color: AppColors.gray,
+    );
+
+    TextStyle valueStyle = TextStyle(
+      fontSize: width * 0.05,
+      fontFamily: "Kodchasan",
+      fontWeight: FontWeight.w900,
+      color: AppColors.dark,
+    );
+
     return PopScope(
       canPop: false,
       child: Scaffold(
         backgroundColor: AppColors.gray,
         appBar: AppBar(
           backgroundColor: AppColors.gray,
-          leading: Icon(
-            Icons.currency_exchange_rounded,
-            color: AppColors.dark,
-          ),
-          title: Text("Para Birimin",
+          leading: const Text(""),
+          actions: [
+            IconButton(
+                iconSize: width * 0.08,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CurrencyListScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(
+                  Icons.dataset_rounded,
+                  color: AppColors.dark,
+                ))
+          ],
+          title: const Text("Para Birimin",
               style: TextStyle(fontFamily: "Kodchasan", color: AppColors.dark)),
         ),
         body: Center(
@@ -70,17 +112,19 @@ class _DashboardState extends State<Dashboard> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       SizedBox(height: width * 0.02),
-                      _infoText("ADI", currencyName),
-                      _infoText("SEMBOL", currencySymbol),
-                      _infoText("BİRİM", currencyBirim?.toString()),
+                      _infoText("ADI", currencyName, labelStyle, valueStyle),
+                      _infoText(
+                          "SEMBOL", currencySymbol, labelStyle, valueStyle),
+                      _infoText("BİRİM", currencyBirim?.toString(), labelStyle,
+                          valueStyle),
                       SizedBox(height: width * 0.02),
-                      Text("BANKNOTLAR", style: _headerStyle),
+                      Text("BANKNOTLAR", style: headerStyle),
                       SizedBox(height: width * 0.02),
-                      _selectionChips("Banknot"),
+                      _selectionChips("Banknot", width),
                       SizedBox(height: width * 0.02),
-                      Text("MADENİ PARALAR", style: _headerStyle),
+                      Text("MADENİ PARALAR", style: headerStyle),
                       SizedBox(height: width * 0.02),
-                      _selectionChips("Metal Para"),
+                      _selectionChips("Metal Para", width),
                     ],
                   ),
                 ),
@@ -90,7 +134,9 @@ class _DashboardState extends State<Dashboard> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const TasksPage()),
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            TasksPage(moneyData: widget.moneyData)),
                   );
                 },
                 style: ElevatedButton.styleFrom(
@@ -105,9 +151,9 @@ class _DashboardState extends State<Dashboard> {
                   "GÖREVLER",
                   style: TextStyle(
                     fontFamily: "Kodchasan",
-                    fontSize: 18,
+                    fontSize: width * 0.06,
                     fontWeight: FontWeight.w900,
-                    color: Colors.white,
+                    color: AppColors.gray,
                   ),
                 ),
               ),
@@ -118,55 +164,66 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  Widget _infoText(String label, String? value) {
+  Widget _infoText(
+      String label, String? value, TextStyle labelStyle, TextStyle valueStyle) {
     return Column(
       children: [
-        Text(label, style: _labelStyle),
-        Text(value ?? "", style: _valueStyle),
+        Text(label, style: labelStyle),
+        Text(value ?? "", style: valueStyle),
       ],
     );
   }
 
-  Widget _selectionChips(String type) {
-    // Filter the selections based on type and convert them to a list
+  Widget _selectionChips(String type, double width) {
     final items = selections.entries
         .where((entry) => entry.value == type)
         .map((entry) => entry.key)
         .toList();
 
-    // Split the items into chunks of 3
-    final rows = <List<String>>[];
+    final rows = <List<double>>[];
     for (var i = 0; i < items.length; i += 3) {
       rows.add(items.sublist(i, i + 3 > items.length ? items.length : i + 3));
     }
 
-    // Build the rows with a maximum of 3 items per row
     return Column(
       children: rows.map((row) {
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: row.map((item) {
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 2.0),
+              padding: EdgeInsets.symmetric(horizontal: width * 0.01),
               child: ElevatedButton(
                 onPressed: () {
-                  _onChipTapped(item);
+                  _onChipTapped(item, width);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.extra,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: EdgeInsets.symmetric(
+                      horizontal: width * 0.01, vertical: width * 0.015),
                 ),
-                child: Text(
-                  item,
-                  style: TextStyle(
-                    fontFamily: "Kodchasan",
-                    fontSize: 18,
-                    color: AppColors.turq,
-                    fontWeight: FontWeight.w900,
-                  ),
+                child: Row(
+                  children: [
+                    Text(
+                      item.toString(),
+                      style: TextStyle(
+                        fontFamily: "Kodchasan",
+                        fontSize: width * 0.05,
+                        color: AppColors.turq,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    SizedBox(
+                      width: width * 0.01,
+                    ),
+                    Icon(
+                      Icons.camera_enhance_rounded,
+                      color: AppColors.gray,
+                      size: width * 0.05,
+                    )
+                  ],
                 ),
               ),
             );
@@ -176,16 +233,11 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  void _onChipTapped(String itemName) async {
-    // Retrieve the image data from SharedPreferences
-    final prefs = await SharedPreferences.getInstance();
-    String? base64Image = prefs.getString('drawing_image_$itemName');
-
+  void _onChipTapped(double itemName, double width) async {
+    String? base64Image = base64Map[itemName];
     if (base64Image != null) {
-      // Decode the Base64 string to Uint8List
-      final Uint8List imageData = base64Decode(base64Image);
+      Uint8List imageData = base64Decode(base64Image);
 
-      // Navigate to the AR screen
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -193,41 +245,40 @@ class _DashboardState extends State<Dashboard> {
         ),
       );
     } else {
-      // Show error if image not found
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text('Error'),
-          content: Text('Image not found.'),
+          title: Text(
+            'Hata',
+            style: TextStyle(
+                fontFamily: "Kodchasan",
+                fontSize: width * 0.06,
+                color: AppColors.dark,
+                fontWeight: FontWeight.w900),
+          ),
+          content: Text(
+            'Bu para birimin için tasarım oluşturmamışsın!',
+            style: TextStyle(
+                fontFamily: "Kodchasan",
+                fontSize: width * 0.04,
+                color: AppColors.dark,
+                fontWeight: FontWeight.w400),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('Close'),
+              child: Text(
+                'Kapat',
+                style: TextStyle(
+                    fontFamily: "Kodchasan",
+                    fontSize: width * 0.04,
+                    color: AppColors.turq,
+                    fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         ),
       );
     }
   }
-
-  TextStyle get _headerStyle => TextStyle(
-        fontSize: 20,
-        fontFamily: "Kodchasan",
-        fontWeight: FontWeight.w900,
-        color: AppColors.gray,
-      );
-
-  TextStyle get _labelStyle => TextStyle(
-        fontSize: 20,
-        fontFamily: "Kodchasan",
-        fontWeight: FontWeight.w900,
-        color: AppColors.gray,
-      );
-
-  TextStyle get _valueStyle => TextStyle(
-        fontSize: 20,
-        fontFamily: "Kodchasan",
-        fontWeight: FontWeight.w900,
-        color: AppColors.dark,
-      );
 }

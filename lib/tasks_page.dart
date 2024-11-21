@@ -1,17 +1,19 @@
 import 'dart:math';
 import 'package:arprojesi/colors.dart';
 import 'package:arprojesi/mission.dart';
+import 'package:arprojesi/moneydata.dart';
 import 'package:flutter/material.dart';
 
 class TasksPage extends StatefulWidget {
-  const TasksPage({Key? key}) : super(key: key);
+  final Moneydata moneyData;
+  const TasksPage({super.key, required this.moneyData});
 
   @override
   _TasksPageState createState() => _TasksPageState();
 }
 
 class _TasksPageState extends State<TasksPage> {
-  final List<int> _taskNumbers = [];
+  final List<double> _taskNumbers = [];
 
   @override
   void initState() {
@@ -20,9 +22,28 @@ class _TasksPageState extends State<TasksPage> {
   }
 
   void _generateRandomTasks() {
-    // Generate 10 random numbers from 1 to 100
-    for (var i = 0; i < 10; i++) {
-      _taskNumbers.add(Random().nextInt(100) + 1);
+    int integerCount = 0;
+    int decimalCount = 0;
+    const totalTasks = 20; // toplam görev sayısı
+
+    while (integerCount + decimalCount < totalTasks) {
+      double newTaskNumber;
+
+      if (integerCount < totalTasks ~/ 2) {
+        // Tam sayı üret (örneğin 100, 20, 40)
+        newTaskNumber = Random().nextInt(100) + 1.0;
+        integerCount++;
+      } else {
+        // Ondalıklı sayı üret (örneğin 20.1, 40.5, 90.9)
+        newTaskNumber =
+            (Random().nextInt(100) + 1.0) + (Random().nextInt(10) * 0.1);
+        decimalCount++;
+      }
+
+      // Sayının zaten listede olup olmadığını kontrol et
+      if (!_taskNumbers.contains(newTaskNumber)) {
+        _taskNumbers.add(newTaskNumber);
+      }
     }
   }
 
@@ -33,7 +54,7 @@ class _TasksPageState extends State<TasksPage> {
       backgroundColor: AppColors.gray,
       appBar: AppBar(
         backgroundColor: AppColors.gray,
-        title: Text(
+        title: const Text(
           'Görevler',
           style: TextStyle(
               fontFamily: "Kodchasan",
@@ -44,9 +65,9 @@ class _TasksPageState extends State<TasksPage> {
       body: GridView.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          childAspectRatio: 1.5,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
+          childAspectRatio: width * 0.008,
+          crossAxisSpacing: width * 0.02,
+          mainAxisSpacing: width * 0.02,
         ),
         padding: EdgeInsets.all(width * 0.03),
         itemCount: _taskNumbers.length,
@@ -62,8 +83,10 @@ class _TasksPageState extends State<TasksPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>
-                      Mission(taskNumber: _taskNumbers[index]),
+                  builder: (context) => Mission(
+                    taskNumber: _taskNumbers[index],
+                    moneyData: widget.moneyData,
+                  ),
                 ),
               );
             },

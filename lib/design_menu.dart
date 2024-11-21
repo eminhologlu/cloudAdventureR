@@ -1,13 +1,20 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:arprojesi/ar_viewer.dart';
 import 'package:arprojesi/colors.dart';
 import 'package:arprojesi/dashboard.dart';
+import 'package:arprojesi/db/mongo.dart';
 import 'package:arprojesi/designer.dart';
+import 'package:arprojesi/moneydata.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DesignMenu extends StatelessWidget {
-  final Map<int, String?> selections;
-
-  const DesignMenu({Key? key, required this.selections}) : super(key: key);
+  final Map<double, String?> selections;
+  final Moneydata moneyData;
+  const DesignMenu(
+      {super.key, required this.selections, required this.moneyData});
 
   @override
   Widget build(BuildContext context) {
@@ -18,14 +25,13 @@ class DesignMenu extends StatelessWidget {
         backgroundColor: AppColors.gray,
         appBar: AppBar(
           backgroundColor: AppColors.gray,
-          leading: Icon(Icons.design_services_rounded),
-          title: Text(
+          leading: const Icon(Icons.design_services_rounded),
+          title: const Text(
             "Tasarım Zamanı",
-            style: TextStyle(fontFamily: "Kodchasan"),
+            style: TextStyle(fontFamily: "Kodchasan", color: AppColors.dark),
           ),
         ),
         body: SafeArea(
-          // Wrap body in SafeArea
           child: Column(
             children: [
               Expanded(
@@ -36,8 +42,7 @@ class DesignMenu extends StatelessWidget {
                     final type = selections[factor];
 
                     return Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 8.0, horizontal: 16.0),
+                      padding: EdgeInsets.symmetric(horizontal: width * 0.03),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -51,8 +56,10 @@ class DesignMenu extends StatelessWidget {
                                     fontSize: width * 0.06),
                               ),
                               subtitle: Text(
-                                "${type ?? 'None'}",
-                                style: TextStyle(fontFamily: "Kodchasan"),
+                                type ?? 'None',
+                                style: const TextStyle(
+                                    fontFamily: "Kodchasan",
+                                    color: AppColors.dark),
                               ),
                             ),
                           ),
@@ -66,6 +73,7 @@ class DesignMenu extends StatelessWidget {
                                   builder: (context) => DrawingScreen(
                                     factor: factor,
                                     type: type,
+                                    moneyData: moneyData,
                                   ),
                                 ),
                               );
@@ -89,6 +97,9 @@ class DesignMenu extends StatelessWidget {
                 onPressed: () {
                   _saveDrawings(context);
                 },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.turq,
+                ),
                 child: Text(
                   "Tamamla",
                   style: TextStyle(
@@ -96,9 +107,6 @@ class DesignMenu extends StatelessWidget {
                       fontFamily: "Kodchasan",
                       fontWeight: FontWeight.bold,
                       fontSize: width * 0.05),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.turq, // or any color you want
                 ),
               ),
             ],
@@ -109,10 +117,12 @@ class DesignMenu extends StatelessWidget {
   }
 
   void _saveDrawings(BuildContext context) async {
-    // After saving, navigate to the Dashboard screen
+    final prefs = await SharedPreferences.getInstance();
+    final username = prefs.getString('username') ?? "";
+    addUserCurrencyData(username, moneyData);
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const Dashboard()),
+      MaterialPageRoute(builder: (context) => Dashboard(moneyData: moneyData)),
     );
   }
 }

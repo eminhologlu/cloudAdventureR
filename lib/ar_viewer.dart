@@ -1,15 +1,16 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:arkit_plugin/arkit_plugin.dart';
+import 'package:arprojesi/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:vector_math/vector_math_64.dart';
 import 'dart:io';
 
 class ImageARPage extends StatefulWidget {
-  final Uint8List imageData; // Image data passed from SharedPreferences
+  final Uint8List imageData;
 
-  const ImageARPage({Key? key, required this.imageData}) : super(key: key);
+  const ImageARPage({super.key, required this.imageData});
 
   @override
   _ImageARPageState createState() => _ImageARPageState();
@@ -17,65 +18,86 @@ class ImageARPage extends StatefulWidget {
 
 class _ImageARPageState extends State<ImageARPage> {
   late ARKitController arkitController;
-  Timer? timer;
+  String? currentImagePath;
 
   @override
   void dispose() {
-    arkitController.dispose(); // Only dispose of the ARKit controller
+    arkitController.dispose();
     super.dispose();
   }
 
   @override
+  void didUpdateWidget(covariant ImageARPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.imageData != oldWidget.imageData) {
+      _updateARKitImage();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('AR Image View')),
+        appBar: AppBar(
+          backgroundColor: AppColors.gray,
+          title: const Text(
+            'AR Görüntüleyici',
+            style: TextStyle(fontFamily: "Kodchasan"),
+          ),
+        ),
         body: ARKitSceneView(
           onARKitViewCreated: onARKitViewCreated,
         ),
       );
 
+  /// Writes image data to a uniquely named temporary file
   Future<String> _writeImageDataToTempFile(Uint8List imageData) async {
-    // Get the temporary directory of the app
     final directory = await getTemporaryDirectory();
-    final filePath = '${directory.path}/temp_image.png';
-    // Write the image data to a file
+    final uniqueFileName =
+        'temp_image_${DateTime.now().millisecondsSinceEpoch}.png';
+    final filePath = '${directory.path}/$uniqueFileName';
     final file = File(filePath);
     await file.writeAsBytes(imageData);
     return filePath;
   }
 
-  void onARKitViewCreated(ARKitController arkitController) async {
-    this.arkitController = arkitController;
+  Future<void> _updateARKitImage() async {
+    if (arkitController == null) return;
 
-    // Write image data to a temporary file
-    final imagePath = await _writeImageDataToTempFile(widget.imageData);
+    // Write the new image data to a unique temporary file
+    final newImagePath = await _writeImageDataToTempFile(widget.imageData);
 
-    // Create a material with the image from the temporary file
+    // Remove the previous node if it exists
+    arkitController.remove('imageNode');
+
+    // Create a new ARKitMaterial with the updated image
     final material = ARKitMaterial(
       lightingModelName: ARKitLightingModel.lambert,
-      diffuse: ARKitMaterialProperty.image(imagePath), // Use the temp file path
+      diffuse: ARKitMaterialProperty.image(newImagePath),
     );
 
-    // Create a plane and assign the material
+    // Create a new ARKitPlane
     final plane = ARKitPlane(
-      width: 0.5,
-      height: 0.5,
+      width: 0.3,
+      height: 0.2,
       materials: [material],
     );
 
-    // Create a node with the plane
+    // Add a new node to the ARKit scene
     final node = ARKitNode(
+      name: 'imageNode',
       geometry: plane,
-      position: Vector3(0, 0, -0.5), // Position in front of the camera
+      position: Vector3(0, 0, -0.5),
     );
 
-    // Add the node to the ARKit scene
     arkitController.add(node);
 
-    // Start infinite rotation
-    timer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
-      final rotation = node.eulerAngles;
-      rotation.y += 0.01; // Rotate around Y-axis continuously
-      node.eulerAngles = rotation;
-    });
+    // Update the current image path
+    currentImagePath = newImagePath;
+  }
+
+  void onARKitViewCreated(ARKitController arkitController) async {
+    this.arkitController = arkitController;
+
+    // Initialize with the initial image data
+    await _updateARKitImage();
   }
 }

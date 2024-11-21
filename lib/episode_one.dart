@@ -12,30 +12,27 @@ class EpisodeOne extends StatefulWidget {
 class _EpisodeOneState extends State<EpisodeOne> {
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      child: Scaffold(
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: AppColors.turq,
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => EpisodeTwo(),
-              ),
-            );
-          },
-          child: Icon(
-            Icons.arrow_forward,
-            color: AppColors.gray,
-          ),
-        ),
-        body: Container(
-          decoration: new BoxDecoration(
-            image: new DecorationImage(
-              image: new AssetImage("assets/images/episode1.png"),
-              fit: BoxFit.cover,
+    return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.turq,
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const EpisodeTwo(),
             ),
+          );
+        },
+        child: const Icon(
+          Icons.arrow_forward,
+          color: AppColors.gray,
+        ),
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/images/episode1.png"),
+            fit: BoxFit.cover,
           ),
         ),
       ),

@@ -23,15 +23,15 @@ class _EpisodeTwoState extends State<EpisodeTwo> {
             ),
           );
         },
-        child: Icon(
+        child: const Icon(
           Icons.arrow_forward,
           color: AppColors.gray,
         ),
       ),
       body: Container(
-        decoration: new BoxDecoration(
-          image: new DecorationImage(
-            image: new AssetImage("assets/images/episode2.png"),
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/images/episode2.png"),
             fit: BoxFit.cover,
           ),
         ),

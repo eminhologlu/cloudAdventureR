@@ -1,49 +1,29 @@
-import 'dart:convert';
 import 'package:arprojesi/colors.dart';
+import 'package:arprojesi/moneydata.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class Mission extends StatefulWidget {
-  final int taskNumber;
+  final double taskNumber;
+  final Moneydata moneyData;
 
-  const Mission({Key? key, required this.taskNumber}) : super(key: key);
+  const Mission({super.key, required this.taskNumber, required this.moneyData});
 
   @override
   State<Mission> createState() => _MissionState();
 }
 
 class _MissionState extends State<Mission> {
-  late List<Map<String, dynamic>> banknotesAndCoins = [];
-  int totalValue = 0;
-  Map<int, String> selections = {};
+  double totalValue = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadSelections();
-  }
-
-  Future<void> _loadSelections() async {
-    final prefs = await SharedPreferences.getInstance();
-    final selectionsString = prefs.getString('selections');
-    if (selectionsString != null) {
-      final Map<String, dynamic> decodedSelections =
-          Map<String, dynamic>.from(jsonDecode(selectionsString));
-      selections = decodedSelections
-          .map((key, value) => MapEntry(int.parse(key), value));
-      banknotesAndCoins = selections.entries.map((entry) {
-        return {'value': entry.key, 'type': entry.value};
-      }).toList();
-    } else {
-      banknotesAndCoins = [];
-    }
-    setState(() {});
-  }
-
-  void _addValue(int value) {
+  void _addValue(double value) {
     setState(() {
       totalValue += value;
-      if (totalValue == widget.taskNumber) {
+
+      // Hata toleransı (epsilon) değeri
+      const epsilon = 0.0001;
+
+      // Hedef değer ile toplam değeri epsilon ile karşılaştırma
+      if ((totalValue - widget.taskNumber).abs() < epsilon) {
         _showMissionCompleteDialog();
       }
     });
@@ -60,11 +40,11 @@ class _MissionState extends State<Mission> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.gray,
-        title: Text(
+        title: const Text(
           'Görev Tamamlandı!',
           style: TextStyle(fontFamily: "Kodchasan", color: AppColors.dark),
         ),
-        content: Text(
+        content: const Text(
           'Hedefe ulaştınız!',
           style: TextStyle(fontFamily: "Kodchasan", color: AppColors.dark),
         ),
@@ -74,7 +54,7 @@ class _MissionState extends State<Mission> {
               Navigator.of(context).pop();
               Navigator.of(context).pop();
             },
-            child: Text(
+            child: const Text(
               'Tamam',
               style: TextStyle(color: AppColors.turq, fontFamily: "Kodchasan"),
             ),
@@ -93,7 +73,7 @@ class _MissionState extends State<Mission> {
         backgroundColor: AppColors.gray,
         title: Text(
           'Hedef ${widget.taskNumber}',
-          style: TextStyle(
+          style: const TextStyle(
               fontFamily: "Kodchasan",
               fontWeight: FontWeight.bold,
               color: AppColors.dark),
@@ -116,7 +96,7 @@ class _MissionState extends State<Mission> {
             ),
             SizedBox(height: width * 0.02),
             Text(
-              'Toplam Değer: $totalValue',
+              'Toplam Değer: ${totalValue.toStringAsFixed(2)}',
               style: TextStyle(
                   fontSize: width * 0.06,
                   fontWeight: FontWeight.bold,
@@ -150,25 +130,29 @@ class _MissionState extends State<Mission> {
               },
             ),
             SizedBox(height: width * 0.01),
-            Container(
+            SizedBox(
               height: width * 1,
               child: GridView.builder(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 5,
+                  crossAxisCount: 4,
                   childAspectRatio: width * 0.0025,
                   mainAxisSpacing: width * 0.01,
                   crossAxisSpacing: width * 0.01,
                 ),
-                itemCount: banknotesAndCoins.length,
+                itemCount: widget.moneyData.selectedCurrencyTypes.length,
                 itemBuilder: (context, index) {
-                  final item = banknotesAndCoins[index];
+                  final item = widget.moneyData.selectedCurrencyTypes.entries
+                      .elementAt(index);
                   return Draggable<Map<String, dynamic>>(
-                    data: item,
+                    data: {
+                      'value': item.key,
+                      'type': item.value,
+                    },
                     feedback: Material(
                       child: Container(
                         padding: EdgeInsets.all(width * 0.05),
                         color: AppColors.turq,
-                        child: Text(item['type'],
+                        child: Text(item.value.toString(),
                             style: TextStyle(
                                 fontSize: width * 0.04,
                                 fontFamily: "Kodchasan",
@@ -179,12 +163,12 @@ class _MissionState extends State<Mission> {
                     childWhenDragging: Container(),
                     child: Card(
                       color: AppColors.turq,
-                      elevation: 5,
+                      elevation: width * 0.02,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            item['value'].toString(),
+                            item.key.toString(),
                             style: TextStyle(
                                 color: AppColors.dark,
                                 fontFamily: "Kodchasan",
@@ -204,7 +188,7 @@ class _MissionState extends State<Mission> {
       floatingActionButton: FloatingActionButton(
         onPressed: _resetTotalValue,
         backgroundColor: AppColors.turq,
-        child: Icon(Icons.refresh, color: AppColors.gray),
+        child: const Icon(Icons.refresh, color: AppColors.gray),
       ),
     );
   }
