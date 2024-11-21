@@ -28,6 +28,11 @@ https://cloud-adventurer-web.vercel.app/
 Projenin gereksinim analizi dokümanı yazıldı.
 Google Drive Linki: https://drive.google.com/file/d/1Tvi_rZ6GWiKBniogvSs-iZPWgnV_6EHb/view?usp=sharing
 
+UML DİYAGRAMLARI.
+Google Drive Linki: https://drive.google.com/file/d/18dyHRb4_9otS52EJjueIRHzM5MyZq_Dn/view?usp=sharing
+
+TSH FORMU DOLDURULDU. TSH SEVİYE 7 ULAŞILDI!!!!
+
 Proje SWOT analizi yapıldı.
 Canva Linki: https://www.canva.com/design/DAGUbjgffQ0/yQLrXyzqwDXuMPKHRSDU1g/edit?utm_content=DAGUbjgffQ0&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
 
@@ -36,7 +41,7 @@ Proje içerisinde kullanılacak renklere karar verildi. -> https://colorhunt.co/
 
 ## 4.HAFTA
 
-Uygulamanın kullanıcı arayüzleri detaylı bir şekilde Figma'da tasarlandı.
+Uygulamanın kullanıcı arayüzleri detaylı bir şekilde Figma'da tasarlandı. RAMS ilkeleri gözetilerek...
 Figma Linki: https://www.figma.com/design/hS9lL3RjlHZOPlyLyEPVNF/Untitled?node-id=0-1&t=TDmLttYSojRCXCQG-1
 
 ## 5.HAFTA
@@ -45,8 +50,8 @@ Kullanıcı arayüzleri (frontend) Flutter'da kodlandı.
 
 ## 6.HAFTA
 
-TODO
+MONGODB BAĞLANTISI LOGIN REGISTER İŞLEVLERİ GERÇEKLEŞTİRİLDİ. ŞİFRE SHA256 İLE ŞİFRELENEREK VERİTABANINDA SAKLANIYOR. (GÜVENLİK). PARA BİRİMİ NESNESİ VERİTABANINA KAYDEDİLİYOR...
 
 ## 7.HAFTA
 
-TODO
+AR ENTEGRASYONU TAMAMLANDI. GÖREV MODÜLÜ EKLENDİ.
